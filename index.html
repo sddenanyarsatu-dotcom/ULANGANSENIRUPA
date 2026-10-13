@@ -1,0 +1,380 @@
+
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Game Seni Rupa Kelas VI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:16px Arial;background:linear-gradient(135deg,#fce4ec,#e3f2fd);color:#24324a}
+header{background:#6a1b9a;color:white;text-align:center;padding:22px;border-bottom:5px solid #ffca28}
+main{max-width:850px;margin:20px auto;padding:0 12px}
+.card{background:white;padding:20px;border-radius:16px;margin-bottom:16px;box-shadow:0 6px 20px #1232}
+.hide{display:none!important}
+.row,.stats,.nav{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:180px}
+input,textarea,select{width:100%;padding:11px;border:2px solid #d9dfeb;border-radius:9px;font:inherit}
+label{display:block;margin:10px 0 6px;font-weight:bold}
+button{padding:12px 15px;border:0;border-radius:10px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+.blue{background:#1565c0;color:white}
+.yellow{background:#ffca28}
+.pale{background:#e8eef7}
+.stats>*{flex:1;min-width:100px;background:#f1f6ff;padding:12px;border-radius:10px;text-align:center}
+.stats b{display:block;font-size:1.5rem;color:#6a1b9a}
+.meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bar{height:9px;background:#eee;border-radius:9px;margin:12px 0}
+.fill{height:100%;background:#43a047;width:0}
+.q{font-size:1.15rem;font-weight:bold;margin:18px 0;line-height:1.5}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:9px;border:2px solid #dce5ef;border-radius:10px;padding:11px;align-items:center}
+.opt input{width:auto}
+.opt:has(input:checked){border-color:#1565c0;background:#edf6ff}
+.hint{background:#fff5d9;padding:10px;border-left:4px solid #ffca28}
+.nav{margin-top:18px}
+.nav button{flex:1}
+.feedback{padding:10px;border-radius:8px;margin-top:10px}
+.bad{background:#fff0e8;color:#8e3e1c}
+.good{background:#e3f8ed;color:#17613f}
+textarea{min-height:120px}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:8px;border-bottom:1px solid #ddd}
+@media(max-width:520px){.card{padding:14px}}
+@media print{header{background:white;color:black}.nav,#login button{display:none!important}body{background:white}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>🎨 Game Edukatif Seni Rupa</h1>
+<p>Kelas VI SD • Misi Kreator Cilik</p>
+</header>
+
+<main>
+<section id="login" class="card">
+<h2>Selamat datang, Seniman Cilik!</h2>
+<p>Masuk dengan nama lengkap dan NIPD.</p>
+
+<div class="stats">
+<div><b>15</b>Pilihan ganda</div>
+<div><b>5</b>PG kompleks</div>
+<div><b>5</b>Menjodohkan</div>
+<div><b>10</b>Isian</div>
+<div><b>5</b>Uraian</div>
+</div>
+
+<div class="row">
+<div>
+<label>Username (nama lengkap)</label>
+<input id="nama" placeholder="Nama sesuai daftar">
+</div>
+<div>
+<label>Password (NIPD)</label>
+<input id="pw" type="password" inputmode="numeric" placeholder="NIPD">
+</div>
+</div>
+
+<p id="err" class="feedback bad hide"></p>
+<p class="hint">Pilih jawaban dengan teliti. Untuk soal kompleks, pilih semua jawaban yang benar.</p>
+<button class="blue" onclick="start()">🚀 Mulai permainan</button>
+</section>
+
+<section id="game" class="card hide">
+<div class="meta">
+<span id="who"></span>
+<span id="kind"></span>
+<span id="num"></span>
+</div>
+<div class="bar"><div id="fill" class="fill"></div></div>
+<div id="question"></div>
+<div id="feedback" class="feedback hide"></div>
+<div class="nav">
+<button id="prev" class="pale" onclick="move(-1)">← Sebelumnya</button>
+<button id="check" class="yellow" onclick="check()">Periksa jawaban</button>
+<button id="next" class="blue" onclick="move(1)">Berikutnya →</button>
+</div>
+</section>
+
+<section id="result" class="card hide"></section>
+</main>
+
+<script>
+const students=[
+["ABID ALVARO GAVRIEL","2759"],
+["AFFIN CHARLISA ACHYARNIS","2760"],
+["ALBY FAREL AXEL FAIRUS","2761"],
+["ANGGRAITA DARA KUSUMANINGRUM","2762"],
+["ARGA ADAM ALFATIR","2763"],
+["ARIF AZHARI SETIAWAN","2764"],
+["AZIZ SATRIO PRAMBUDI","2765"],
+["AZKA KHOIRUNNISA","2766"],
+["BILQIS ZAHIRA ALYA AZIZA","2820"],
+["DANIEL IRKHAM YUNIANTO","2767"],
+["DELTA DANIES WICAKSONO","2768"],
+["ELVINA NOVITA SARI","2769"],
+["FATIN DESTIANA SHIDQIA","2770"],
+["IAN THU ALFIAN","2771"],
+["KHALISA ZAHRA RAMADHANI","2772"],
+["LABIBAH ANINDYA JIHAN TALITA ULFA","2774"],
+["MAYDA NURUL AZKIA","2775"],
+["MUHAMMAD AMIRRUDIN","2776"],
+["MUHAMMAD EZA HAFIZ ADITIYA","2777"],
+["MUHAMMAD RIFKY CAHYO SAPUTRO","2778"],
+["NURIYA JANNATUN NAIM","2779"],
+["PRABU AHMAD AHNAFI","2780"],
+["QEYLA ABSHARI FIRDA RAHMADANI","2848"],
+["RAHMAT MAULANA","2781"],
+["RAVA'EL DWI VANDIMAS","2782"],
+["RAVE'AL DIMAS PRAYOGA","2783"],
+["RISMACERLYN NUR ISKANDAR","2784"],
+["SAMUEL DESWA ANGGARA","2785"],
+["VAHDIL ASKA HARIANSYAH","2824"]
+];
+
+const Q=[];
+const add=(t,q,o,a)=>Q.push({t,q,o,a});
+
+[
+["Unsur seni rupa yang terbentuk dari jejak titik bergerak adalah …",["Warna","Garis","Tekstur","Ruang"],1],
+["Kesan halus atau kasar pada permukaan disebut …",["Tekstur","Bidang","Gelap terang","Ruang"],0],
+["Merah, kuning, dan biru termasuk warna …",["Sekunder","Tersier","Primer","Netral"],2],
+["Campuran merah dan kuning menghasilkan …",["Hijau","Ungu","Jingga","Biru"],2],
+["Karya dua dimensi memiliki …",["Panjang dan lebar","Panjang, lebar, tinggi","Volume saja","Ruang nyata"],0],
+["Contoh karya tiga dimensi adalah …",["Poster","Lukisan","Patung","Ilustrasi"],2],
+["Kesan sama berat dalam susunan karya disebut …",["Irama","Keseimbangan","Kontras","Proporsi"],1],
+["Pengulangan unsur secara teratur menciptakan …",["Irama","Tekstur","Ruang","Siluet"],0],
+["Alat untuk mengoleskan cat air adalah …",["Palu","Kuas","Pahat","Gergaji"],1],
+["Teknik menempelkan berbagai bahan disebut …",["Kolase","Ukir","Cetak tinggi","Pahat"],0],
+["Gambar untuk menjelaskan isi cerita disebut …",["Ilustrasi","Denah","Grafik","Peta"],0],
+["Susunan kepingan kecil bahan berwarna membentuk gambar disebut …",["Mozaik","Sketsa","Arsir","Model"],0],
+["Unsur yang memberi kesan permukaan benda disebut …",["Tekstur","Komposisi","Proporsi","Perspektif"],0],
+["Kegiatan memahami dan menghargai karya seni disebut …",["Apresiasi","Imitasi","Dekorasi","Produksi"],0],
+["Rancangan gambar awal sebelum diselesaikan disebut …",["Sketsa","Pigmen","Pigura","Pameran"],0]
+].forEach(x=>add("PG",...x));
+
+[
+["Pilih semua unsur seni rupa.",["Garis","Warna","Tekstur","Suara"],[0,1,2]],
+["Pilih semua karya tiga dimensi.",["Patung","Vas keramik","Poster","Miniatur rumah"],[0,1,3]],
+["Pilih semua alat/bahan menggambar atau mewarnai.",["Pensil","Krayon","Cat air","Suara"],[0,1,2]],
+["Pilih sikap baik saat mengapresiasi karya teman.",["Memberi komentar sopan","Menghargai usaha","Mengejek","Memberi saran membangun"],[0,1,3]],
+["Pilih semua teknik berkarya seni rupa.",["Kolase","Mozaik","Menggambar","Bersikap jujur"],[0,1,2]]
+].forEach(x=>add("K",...x));
+
+const choices=["Warna","Garis","Tekstur","Kolase","Sketsa"];
+[
+["Unsur yang memberi kesan merah atau biru",0],
+["Jejak titik yang bergerak",1],
+["Kesan halus atau kasar",2],
+["Teknik menempel bahan pada bidang",3],
+["Rancangan awal gambar",4]
+].forEach(x=>add("M",x[0],choices,x[1]));
+
+[
+["Titik, garis, bidang, bentuk, warna, tekstur, ruang, dan gelap terang disebut unsur …",["seni rupa"]],
+["Merah, kuning, dan biru disebut warna …",["primer","dasar"]],
+["Campuran biru dan kuning menghasilkan warna …",["hijau"]],
+["Karya yang memiliki panjang, lebar, dan tinggi disebut karya … dimensi.",["tiga","3"]],
+["Teknik menempel potongan bahan pada bidang gambar disebut …",["kolase"]],
+["Teknik menyusun kepingan kecil menjadi gambar disebut …",["mozaik","mosaik"]],
+["Rancangan awal gambar disebut …",["sketsa"]],
+["Alat untuk mengoleskan cat adalah …",["kuas"]],
+["Kegiatan memahami dan menghargai karya disebut …",["apresiasi"]],
+["Susunan unsur seni rupa dalam karya disebut …",["komposisi"]]
+].forEach(x=>add("I",x[0],null,x[1]));
+
+[
+["Jelaskan perbedaan karya seni rupa dua dimensi dan tiga dimensi. Berikan masing-masing dua contoh."],
+["Sebutkan lima unsur seni rupa dan jelaskan dua di antaranya."],
+["Jelaskan cara membuat kolase sederhana dan bahan yang bisa digunakan."],
+["Mengapa kita harus menghargai karya teman? Berikan dua contoh sikap."],
+["Rancang poster bertema menjaga lingkungan. Jelaskan tema, gambar, warna, dan pesannya."]
+].forEach(x=>add("U",x[0],null,null));
+
+let i=0,A={};
+const labels={
+PG:"Pilihan Ganda",
+K:"Pilihan Ganda Kompleks",
+M:"Menjodohkan",
+I:"Isian Singkat",
+U:"Uraian"
+};
+
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
+const norm=s=>String(s??"").toLowerCase().trim()
+.normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+.replace(/[.,!?]/g,"").replace(/\s+/g," ");
+
+function start(){
+let n=String(document.getElementById("nama").value)
+.toLocaleUpperCase("id-ID").trim().replace(/\s+/g," ");
+let p=document.getElementById("pw").value.trim();
+let s=students.find(x=>x[0]===n&&x[1]===p);
+let e=document.getElementById("err");
+
+if(!s){
+e.textContent="Nama atau NIPD salah. Periksa kembali data login.";
+e.classList.remove("hide");
+return;
+}
+
+document.getElementById("nama").value=s[0];
+e.classList.add("hide");
+document.getElementById("login").classList.add("hide");
+document.getElementById("game").classList.remove("hide");
+document.getElementById("who").textContent="👤 "+s[0];
+render();
+}
+
+function render(){
+let x=Q[i];
+let h='<div class="q">'+(i+1)+". "+x.q+'</div>';
+
+document.getElementById("kind").textContent=labels[x.t];
+document.getElementById("num").textContent="Soal "+(i+1)+"/"+Q.length;
+document.getElementById("fill").style.width=((i+1)/Q.length*100)+"%";
+document.getElementById("feedback").classList.add("hide");
+
+if(x.t==="PG"||x.t==="K"){
+if(x.t==="K")h+='<p class="hint">Pilih semua jawaban yang benar.</p>';
+h+='<div class="opts">';
+
+x.o.forEach((v,j)=>{
+h+='<label class="opt"><input type="'+
+(x.t==="K"?"checkbox":"radio")+'" name="q'+i+
+'" value="'+j+'" '+
+(Array.isArray(A[i])&&A[i].includes(j)?"checked":"")+
+'><span>'+String.fromCharCode(65+j)+". "+v+"</span></label>";
+});
+h+="</div>";
+
+}else if(x.t==="M"){
+h+='<div class="row"><strong>'+x.q+'</strong><select id="ans"><option value="">-- Pilih pasangan --</option>'+
+x.o.map((v,j)=>'<option value="'+j+'" '+
+(A[i]===j?"selected":"")+'>'+v+"</option>").join("")+
+"</select></div>";
+
+}else if(x.t==="I"){
+h+='<label>Jawaban singkat</label><input id="ans" value="'+
+esc(A[i]||"")+'" placeholder="Ketik jawaban">';
+
+}else{
+h+='<label>Jawaban uraian</label><textarea id="ans" placeholder="Tuliskan jawaban">'+
+esc(A[i]||"")+'</textarea><p class="small">Uraian diperiksa oleh guru.</p>';
+}
+
+document.getElementById("question").innerHTML=h;
+document.getElementById("prev").disabled=i===0;
+document.getElementById("next").textContent=
+i===Q.length-1?"Selesai":"Berikutnya →";
+document.getElementById("check").classList.toggle("hide",x.t==="U");
+}
+
+function capture(){
+let x=Q[i];
+
+if(x.t==="PG"){
+let e=document.querySelector('input[name="q'+i+'"]:checked');
+A[i]=e?[+e.value]:[];
+
+}else if(x.t==="K"){
+A[i]=[...document.querySelectorAll('input[name="q'+i+'"]:checked')]
+.map(e=>+e.value);
+
+}else{
+let e=document.getElementById("ans");
+if(e)A[i]=x.t==="M"?(e.value===""?null:+e.value):e.value.trim();
+}
+}
+
+function correct(j){
+let x=Q[j],a=A[j];
+
+if(x.t==="PG")return Array.isArray(a)&&a[0]===x.a;
+
+if(x.t==="K")
+return Array.isArray(a)&&a.length===x.a.length&&
+a.every(v=>x.a.includes(v));
+
+if(x.t==="M")return a===x.a;
+
+if(x.t==="I")return x.a.some(v=>norm(v)===norm(a));
+
+return false;
+}
+
+function check(){
+capture();
+let x=Q[i];
+let f=document.getElementById("feedback");
+f.classList.remove("hide","good","bad");
+
+if(!A[i]||(Array.isArray(A[i])&&!A[i].length)||
+(x.t==="M"&&A[i]===null)||A[i]===""){
+f.classList.add("bad");
+f.textContent="Isi jawaban terlebih dahulu.";
+
+}else if(correct(i)){
+f.classList.add("good");
+f.textContent="🎉 Benar! Kamu mendapat poin.";
+
+}else{
+f.classList.add("bad");
+f.textContent="Belum tepat. Tetap semangat!";
+}
+}
+
+function move(d){
+capture();
+
+if(d===1&&i===Q.length-1){
+finish();
+return;
+}
+
+i=Math.max(0,Math.min(Q.length-1,i+d));
+render();
+}
+
+function finish(){
+capture();
+
+let n=0;
+Q.forEach((x,j)=>{
+if(x.t!=="U"&&correct(j))n++;
+});
+
+document.getElementById("game").classList.add("hide");
+
+let r=document.getElementById("result");
+r.classList.remove("hide");
+
+r.innerHTML=
+'<h2>🏆 Permainan Selesai!</h2>'+
+'<p>Hebat, <b>'+esc(document.getElementById("nama").value)+'</b>!</p>'+
+'<div class="stats">'+
+'<div><b>'+Math.round(n/35*100)+'</b>Nilai otomatis</div>'+
+'<div><b>'+n+'/35</b>Objektif benar</div>'+
+'<div><b>'+Q.filter((x,j)=>x.t==="U"&&String(A[j]||"").trim()).length+
+'/5</b>Uraian terisi</div></div>'+
+'<p class="hint">Nilai dihitung dari 35 soal objektif. Soal uraian perlu diperiksa guru.</p>'+
+'<h3>Rekap</h3>'+
+'<div style="max-height:350px;overflow:auto"><table>'+
+'<tr><th>No</th><th>Jenis</th><th>Status</th></tr>'+
+Q.map((x,j)=>
+'<tr><td>'+(j+1)+'</td><td>'+labels[x.t]+'</td><td>'+
+(x.t==="U"?
+(String(A[j]||"").trim()?"Terisi—periksa guru":"Belum diisi"):
+(correct(j)?"Benar":"Perlu diperbaiki"))+
+'</td></tr>').join("")+
+'</table></div>'+
+'<div class="nav">'+
+'<button class="yellow" onclick="window.print()">Cetak rekap</button>'+
+'<button class="blue" onclick="location.reload()">Main lagi</button>'+
+'</div>';
+}
+</script>
+</body>
+</html>
